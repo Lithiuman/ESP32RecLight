@@ -34,8 +34,6 @@ const unsigned long BLINK_INTERVAL_NO_WIFI = 150;
 const unsigned long BLINK_INTERVAL_NO_MQTT = 150;
 const unsigned long BLINK_INTERVAL_ARMED = 100;
 
-String lastText = "";
-
 char mqtt_server[40] = "10.1.10.3";
 char mqtt_port[6] = "1883";
 char mqtt_user[32] = "dmtech";
@@ -182,6 +180,8 @@ void sendHADiscovery()
     if (!client.connected())
         return;
 
+    //yes all this is depracated but if it aint broke don't fix it    
+
     StaticJsonDocument<768> doc;
     doc["name"] = "Recording";
     doc["state_topic"] = String(topic_recording);
@@ -227,21 +227,21 @@ void setupWiFiManager()
 
     prefs.begin("midicfg", true);
     String s;
-    s = prefs.getString("mqtt_server", "192.168.0.253");
+    s = prefs.getString("mqtt_server", mqtt_server);
     s.toCharArray(mqtt_server, sizeof(s));
-    s = prefs.getString("mqtt_port", "1883");
+    s = prefs.getString("mqtt_port", mqtt_port);
     s.toCharArray(mqtt_port, sizeof(s));
-    s = prefs.getString("mqtt_user", "dmtech");
+    s = prefs.getString("mqtt_user", mqtt_user);
     s.toCharArray(mqtt_user, sizeof(s));
-    s = prefs.getString("mqtt_pass", "stamedia");
+    s = prefs.getString("mqtt_pass", mqtt_pass);
     s.toCharArray(mqtt_pass, sizeof(s));
-    s = prefs.getString("topic_rec", "midi/recording");
+    s = prefs.getString("topic_rec", topic_recording);
     s.toCharArray(topic_recording, sizeof(s));
-    s = prefs.getString("topic_arm", "midi/armed");
+    s = prefs.getString("topic_arm", topic_armed);
     s.toCharArray(topic_armed, sizeof(s));
-    s = prefs.getString("note_rec", "127");
+    s = prefs.getString("note_rec", rec_note_str);
     s.toCharArray(rec_note_str, sizeof(s));
-    s = prefs.getString("note_arm", "60");
+    s = prefs.getString("note_arm", armed_note_str);
     s.toCharArray(armed_note_str, sizeof(s));
     prefs.end();
 
