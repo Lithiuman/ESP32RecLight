@@ -76,8 +76,10 @@ bool recordingState = false;
 
 unsigned long lastWifiCheck = 0;
 unsigned long lastMqttAttempt = 0;
+unsigned long lastAvailabilityPublish = 0;
 const unsigned long WIFI_RETRY_INTERVAL = 2500;
 const unsigned long MQTT_RETRY_INTERVAL = 1000;
+const unsigned long AVAILABILITY_PUBLISH_INTERVAL = 30000;
 
 unsigned long wifiDisconnectRestartIntervalMs = 60000;
 unsigned long periodicRestartIntervalMs = 10800000;
@@ -617,7 +619,20 @@ void reconnectMQTT()
         client.publish(AVAILABILITY_TOPIC, "online", true);
         client.subscribe(RESET_COMMAND_TOPIC);
         ha_discovery_sent = false;
+        lastAvailabilityPublish = millis();
     }
+}
+
+void publishAvailability()
+{
+    if (!client.connected())
+        return;
+    if (millis() - lastAvailabilityPublish < AVAILABILITY_PUBLISH_INTERVAL)
+        return;
+    
+    lastAvailabilityPublish = millis();
+    client.publish(AVAILABILITY_TOPIC, "online", true);
+    Serial.println("[MQTT] Availability heartbeat sent");
 }
 
 void sendHADiscovery()
@@ -814,6 +829,7 @@ void loop()
     checkWiFi();
     reconnectMQTT();
     client.loop();
+    publishAvailability();
     webServer.handleClient();
 
     if (!ha_discovery_sent && client.connected())
